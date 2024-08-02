@@ -1,7 +1,10 @@
 ﻿using Microsoft.SqlServer.Server;
 using System;
+using System.Collections;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using System.Linq;
+using System.Runtime.InteropServices;
 using static System.Collections.Specialized.BitVector32;
 
 namespace FinalProject
@@ -192,7 +195,7 @@ namespace FinalProject
             //UI
             Console.Clear();
 
-            Console.WriteLine("Welcome to the Flexi Enlistment/Enrollment System!");
+            Console.WriteLine("Welcome to the Flexi Enlistment/Enrollment System!\n");
             Console.Write("Enter username: ");
             string Username = Console.ReadLine();
             Console.Write("Enter password: ");
@@ -223,7 +226,7 @@ namespace FinalProject
             //Login Failed
             else
             {
-                Console.WriteLine("Invalid username or password.");
+                Console.WriteLine("\nInvalid username or password.");
                 Console.WriteLine("Press any key to try again...");
                 Console.ReadKey();
                 LoginPage(); // Retry login
@@ -327,8 +330,8 @@ namespace FinalProject
 
             string Choice = "";
             //UI
-            Console.WriteLine($"Hello Admin {CurrentUser}!");
-            Console.WriteLine("[1] View courses\n[2] View Student Requests\n[3] View Student Accounts\n[4] Change Password\n[0] Back (Logout)\n[-] Forwards");
+            Console.WriteLine($"\nHello Admin {CurrentUser}!");
+            Console.WriteLine("[1] View courses\n[2] View Student Requests (" + StudentRequests.GetQueue().Count() + ")\n[3] View Student Accounts\n[4] Change Password\n[0] Back (Logout)\n[-] Forwards");
             Console.Write("Enter Action: ");
             Choice = Console.ReadLine();
             if (Choice == "1")
@@ -358,6 +361,10 @@ namespace FinalProject
             if (Choice == "-")
             {
                 NavigateForwards();
+            }
+            else
+            {
+                AdminMenuPage();
             }
         }
 
@@ -415,6 +422,15 @@ namespace FinalProject
                 bool Result2 = Int32.TryParse(Console.ReadLine(), out temp);
                 if (Result2 && temp > 0 && temp - 1 <= StudentAccounts.Count)
                 {
+                    string UsernameOfDeletedAccount = StudentAccounts.Keys()[temp - 1];
+                    for (int i = 0; i < Database.Count(); i ++)
+                    {
+                        Database[i].studentsEnrolled.Remove(UsernameOfDeletedAccount);
+                        for (int j = 0; j < Database[i].Sections.Count(); j ++)
+                        {
+                            Database[i].Sections[j].StudentsInSection.Remove(UsernameOfDeletedAccount);
+                        }
+                    }
                     StudentAccounts.Remove(StudentAccounts.Keys()[temp - 1]);
                     StudentAccountsPage();
                 }
@@ -494,12 +510,19 @@ namespace FinalProject
             { 
                 for (int i = 0; i < Database.Count(); i++)
                 {
-                    Console.WriteLine("[" + (i + 1) + "] " + Database[i].Course + "\t:\t" + Database[i].studentsEnrolled.Count() + "/" + Database[i].MaxCourseStudents);
+                    Console.Write("[" + (i + 1) + "] " + Database[i].Course + "\t:\t" + Database[i].studentsEnrolled.Count() + "/" + Database[i].MaxCourseStudents);
+                    if (Database[i].studentsEnrolled.Contains(CurrentUser))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("\tENROLLED");
+                        Console.ResetColor();
+                    }
+                    Console.WriteLine();
                 }
             }
             if (IsAdmin)
             {
-                Console.WriteLine("\n[-] Add a Course\n[#] Edit a Course\n[0] Back");
+                Console.WriteLine("\n[-] Add a Course\n[#] Edit Course\n[=] Delete a course\n[0] Back");
                 Console.Write("Enter Action: ");
                 Choice = Console.ReadLine();
                 int choiceNumber;
@@ -516,6 +539,29 @@ namespace FinalProject
                 else if (Choice == "-")
                 {
                     AddCoursePage();
+                }
+                else if (Choice == "=")
+                {
+                    if (Database.Count() <= 0)
+                    {
+                        Console.WriteLine("\nThere are no courses to delete\nPress any key to refresh the page...");
+                        Console.ReadKey();
+                        CoursesPage();
+                    }
+                    int temp = 0;
+                    Console.Write("\nEnter # of course to be deleted: ");
+                    bool Result2 = (Int32.TryParse(Console.ReadLine(), out temp));
+                    if (Result2 && Database.Count() > 0 && temp >= 1 && temp - 1 <= Database.Count())
+                    {
+                        Database.RemoveAt(temp - 1);
+                        CoursesPage();
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nIncorrect entry\nPress any key to refresh the page...");
+                        Console.ReadKey();
+                        CoursesPage();
+                    }
                 }
                 else
                 {
@@ -611,16 +657,26 @@ namespace FinalProject
             string choice = "";
             for (int i = 0; i < StudentRequests.Count(); i++)
                 temp.Add(StudentRequests.GetQueue()[i]);
-            //Remove request if it is accomplished manually
+            //Remove request if student is already not in the section or course cannot be found before rendering page
+            bool HasFoundCourse = false;
             for (int i = 0; i < temp.Count(); i++)
             {
                 for (int j = 0; j < Database.Count(); j++)
                 {
-                    if (temp[i].Course == Database[j].Course && !Database[j].studentsEnrolled.Contains(temp[i].Student))
+                    if (temp[i].Course == Database[j].Course)
                     {
-                        StudentRequests.Dequeue();
-                        temp.RemoveAt(0);
+                        HasFoundCourse = true;
+                        if (!Database[j].studentsEnrolled.Contains(temp[i].Student))
+                        {
+                            StudentRequests.Dequeue();
+                            temp.RemoveAt(0);
+                        }
                     }
+                }
+                if (!HasFoundCourse)
+                {
+                    StudentRequests.Dequeue();
+                    temp.RemoveAt(0);
                 }
             }
 
@@ -707,12 +763,20 @@ namespace FinalProject
                         Database[IndexOfCourseBeingEdited].Sections[i].Room + "\t" +
                         Database[IndexOfCourseBeingEdited].Sections[i].Professor + "\t" +
                         Database[IndexOfCourseBeingEdited].Sections[i].StudentsInSection.Count() + "/" + Database[IndexOfCourseBeingEdited].Sections[i].MaxStudentsInSection);
+                    if (Database[IndexOfCourseBeingEdited].Sections[i].StudentsInSection.Contains(CurrentUser))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("\tENROLLED");
+                        Console.ResetColor();
+                    }
                 }
             }
 
-            Console.WriteLine("\n[#] Section to enroll in\n[-] Request removal from course\n[0] Back");
+            Console.WriteLine("\n\n[#] Section to enroll in\n[-] Request removal from course\n[0] Back");
             Console.Write("Enter Action: ");
+            int temp = -1;
             Choice = Console.ReadLine();
+            bool Result = Int32.TryParse(Choice, out temp);
             if (Choice == "-")
             {
                 //course removal request
@@ -733,7 +797,7 @@ namespace FinalProject
                 StudentRequests.Enqueue(new Request(Course, Student, Reason));
                 EnrollCoursePage(IndexOfCourseBeingEdited);
             }
-            else if (Int32.Parse(Choice) > 0 && Int32.Parse(Choice) <= Database[IndexOfCourseBeingEdited].Sections.Count())
+            else if (temp > 0 && temp <= Database[IndexOfCourseBeingEdited].Sections.Count())
             {
                 //check if student has conflicting scheds
                 Section tempSection = Database[IndexOfCourseBeingEdited].Sections[Int32.Parse(Choice) - 1];
@@ -866,7 +930,8 @@ namespace FinalProject
                 }
             }
 
-            Console.WriteLine("\n[#] Edit a section\n[-] Add a section\n[=] Delete a section\n[5] Remove a student\n[0] Back");
+            Console.WriteLine("\n-----------------------------------------------------------------\n");
+            Console.WriteLine("[#] Edit a section\n[-] Add a section\n[=] Delete a section\n[5] Remove a student\n[;] Edit Course\n[0] Back");
             Console.Write("Enter Action: ");
             Choice = Console.ReadLine();
             int temp = 0;
@@ -895,7 +960,7 @@ namespace FinalProject
                     }
                     else if (!Result2)
                     {
-                        Console.WriteLine("\nIncorrect entry\n.Press any key to refresh...");
+                        Console.WriteLine("\nIncorrect entry\nPress any key to refresh...");
                         Console.ReadKey();
                         EditCoursePage(IndexOfCourseBeingEdited);
                     }
@@ -919,6 +984,99 @@ namespace FinalProject
             else if (Choice == "0")
             {
                 CoursesPage();
+            }
+            else if (Choice == ";")
+            {
+                Console.Clear();
+                ShowURL();
+                Console.WriteLine();
+                Console.WriteLine("[1] Course Name: " + Database[IndexOfCourseBeingEdited].Course);
+                Console.WriteLine("[2] Course Description: " + Database[IndexOfCourseBeingEdited].Description);
+                Console.WriteLine("[3] Course Units: " + Database[IndexOfCourseBeingEdited].CourseUnits.ToString());
+                Console.WriteLine("[4] Maximum Amount of Students: " + Database[IndexOfCourseBeingEdited].MaxCourseStudents.ToString() + "\n");
+                Console.Write("[#] Field to edit\n[0] Back\nEnter Action: ");
+                for (int i = 0; i < StudentRequests.GetQueue().Length; i++)
+                {
+                    Console.WriteLine(StudentRequests.GetQueue()[i].Course + StudentRequests.GetQueue()[i].Student + StudentRequests.GetQueue()[i].Reason);
+                }
+                bool Result2 = (Int32.TryParse(Console.ReadLine(), out temp));
+                if (Result2)
+                {
+                    if (temp == 1)
+                    {
+                        string PreviousNameOfCourse = Database[IndexOfCourseBeingEdited].Course;
+                        //change course name
+                        Console.Write("\nEnter new course name: ");
+                        Choice = Console.ReadLine();
+                        //Check if there already is a course with the same name
+                        for (int i = 0; i < Database.Count(); i++)
+                        {
+                            if (Database[i].Course == Choice)
+                            {
+                                Console.WriteLine("\nThere already exists a course with the same name\nPress any key to go back...");
+                                Console.ReadKey();
+                                EditCoursePage(IndexOfCourseBeingEdited);
+                            }
+                        }
+                        Database[IndexOfCourseBeingEdited].Course = Choice;
+                        //sync student requests
+                        for (int i = 0; i < StudentRequests.Count(); i++)
+                            if (StudentRequests[i].Course == PreviousNameOfCourse)
+                                StudentRequests[i].Course = Choice;
+                        EditCoursePage(IndexOfCourseBeingEdited);
+                    }
+                    else if (temp == 2)
+                    {
+                        Console.Write("\nEnter new course description: ");
+                        Database[IndexOfCourseBeingEdited].Description = Console.ReadLine();
+                        EditCoursePage(IndexOfCourseBeingEdited);
+                    }
+                    else if (temp == 3)
+                    {
+                        Console.Write("\nEnter new amount of course units: ");
+                        bool Result3 = Int32.TryParse(Console.ReadLine(), out temp);
+                        if (Result3)
+                        {
+                            Database[IndexOfCourseBeingEdited].CourseUnits = temp;
+                        }
+                        EditCoursePage(IndexOfCourseBeingEdited);
+                    }
+                    else if (temp == 4)
+                    {
+                        Console.Write("\nEnter new amount of course's max student amount: ");
+                        bool Result3 = Int32.TryParse(Console.ReadLine(), out temp);
+                        if (Result3)
+                        {
+                            //get maximum students right now as per section capacity and check if it is larger than what you set
+                            int CurrentSectionsMaxStudentsSummed = 0;
+                            for (int i = 0; i < Database[IndexOfCourseBeingEdited].Sections.Count(); i++)
+                                CurrentSectionsMaxStudentsSummed += Database[IndexOfCourseBeingEdited].Sections[i].MaxStudentsInSection;
+                            if (temp > -1 && temp >= CurrentSectionsMaxStudentsSummed)
+                                Database[IndexOfCourseBeingEdited].CourseUnits = temp;
+                            else
+                            {
+                                Console.WriteLine("\nThe sum of maximum students per section is greater than the course's new maximum student amount\nPress any key to go back...");
+                                Console.ReadKey();
+                                EditCoursePage(IndexOfCourseBeingEdited);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nIncorrect Entry\nPress any key to go back...");
+                            Console.ReadKey();
+                            EditCoursePage(IndexOfCourseBeingEdited);
+                        }
+                        EditCoursePage(IndexOfCourseBeingEdited);
+                    }
+                }
+                else
+                {
+                    EditCoursePage(IndexOfCourseBeingEdited);
+                }
+            }
+            else
+            {
+                EditCoursePage(IndexOfCourseBeingEdited);
             }
         }
         public static void AddSectionPage(int IndexOfCourseBeingEdited)

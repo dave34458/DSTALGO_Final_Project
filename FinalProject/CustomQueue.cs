@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace FinalProject
 {
@@ -10,6 +11,17 @@ namespace FinalProject
         {
             array = new T[5];
             count = 0; front = 0; rear = -1;
+        }
+        public T this[int index]
+        {
+            get
+            {
+                return array[index];
+            }
+            set
+            {
+                array[index] = value;
+            }
         }
         public int Count()
         {
@@ -62,6 +74,5 @@ namespace FinalProject
             else
                 return new T[] { };
         }
-
     }
 }
