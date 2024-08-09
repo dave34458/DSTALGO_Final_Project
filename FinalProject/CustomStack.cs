@@ -4,7 +4,7 @@ namespace FinalProject
 {
     internal class CustomStack
     {
-        public object[] array; //change this back to private
+        public object[] array;
         private int top;
         public CustomStack()
         {

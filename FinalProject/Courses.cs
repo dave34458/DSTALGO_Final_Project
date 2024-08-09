@@ -21,31 +21,26 @@ namespace FinalProject
             studentsEnrolled = new CustomList<string>();
             Sections = new CustomList<Section>();
         }
-
         public string Course
         {
             get { return course; }
             set { course = value; }
         }
-
         public string Description
         {
             get { return description; }
             set { description = value; }
         }
-
         public int CourseUnits
         {
             get { return courseUnits; }
             set { courseUnits = value; }
         }
-
         public int MaxCourseStudents
         {
             get { return maxCourseStudents; }
             set { maxCourseStudents = value; }
         }
-
         public bool IsOverlappingSection(Section newSection)
         {
             for (int i = 0; i < Sections.Count(); i++)

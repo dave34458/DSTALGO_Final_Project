@@ -5,16 +5,13 @@ public class CustomDictionary<TKey, TValue>
     private TKey[] _keys;
     private TValue[] _values;
     private int _size;
-
     public CustomDictionary()
     {
         _keys = new TKey[4];
         _values = new TValue[4];
         _size = 0;
     }
-
     public int Count => _size;
-
     public TValue this[TKey key]
     {
         get
@@ -38,9 +35,7 @@ public class CustomDictionary<TKey, TValue>
     {
         CustomList<TKey> keysList = new CustomList<TKey>();
         for (int i = 0; i < _size; i++)
-        {
             keysList.Add(_keys[i]);
-        }
         return keysList;
     }
 
@@ -53,7 +48,6 @@ public class CustomDictionary<TKey, TValue>
         }
         return valuesList;
     }
-
     public void Add(TKey key, TValue value)
     {
         if (IndexOfKey(key) >= 0)
@@ -64,7 +58,6 @@ public class CustomDictionary<TKey, TValue>
         _values[_size] = value;
         _size++;
     }
-
     public bool Remove(TKey key)
     {
         int index = IndexOfKey(key);
@@ -75,12 +68,10 @@ public class CustomDictionary<TKey, TValue>
         }
         return false;
     }
-
     public bool ContainsKey(TKey key)
     {
         return IndexOfKey(key) >= 0;
     }
-
     public bool TryGetValue(TKey key, out TValue value)
     {
         int index = IndexOfKey(key);
@@ -92,17 +83,13 @@ public class CustomDictionary<TKey, TValue>
         value = default(TValue);
         return false;
     }
-
     private int IndexOfKey(TKey key)
     {
         for (int i = 0; i < _size; i++)
-        {
             if (_keys[i].Equals(key))
                 return i;
-        }
         return -1;
     }
-
     private void RemoveAt(int index)
     {
         _size--;
@@ -114,7 +101,6 @@ public class CustomDictionary<TKey, TValue>
         _keys[_size] = default(TKey);
         _values[_size] = default(TValue);
     }
-
     private void EnsureCapacity(int min)
     {
         if (_keys.Length < min)

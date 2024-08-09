@@ -184,6 +184,7 @@ namespace FinalProject
             for (int k = HistoryForwards.Count() - 1; k >= 0; k--)
                 Console.Write(HistoryForwards.array[k] + "\t");
             Console.WriteLine();
+            Console.WriteLine();
         }
 
 
@@ -320,6 +321,10 @@ namespace FinalProject
             {
                 NavigateForwards();
             }
+            else
+            {
+                StudentMenuPage();
+            }
         }
 
         static void AdminMenuPage()
@@ -330,7 +335,7 @@ namespace FinalProject
 
             string Choice = "";
             //UI
-            Console.WriteLine($"\nHello Admin {CurrentUser}!");
+            Console.WriteLine($"Hello Admin {CurrentUser}!");
             Console.WriteLine("[1] View courses\n[2] View Student Requests (" + StudentRequests.GetQueue().Count() + ")\n[3] View Student Accounts\n[4] Change Password\n[0] Back (Logout)\n[-] Forwards");
             Console.Write("Enter Action: ");
             Choice = Console.ReadLine();
@@ -381,7 +386,7 @@ namespace FinalProject
             ShowURL();
             int temp = 0;
             string Choice = "";
-            Console.WriteLine("\nStudent Accounts: ");
+            Console.WriteLine("Student Accounts: ");
             for (int i = 0; i < StudentAccounts.Count; i++) 
                 Console.WriteLine("[" + (i + 1) + "] " + StudentAccounts.Keys()[i] + " : " + StudentAccounts.Values()[i]);
             Console.WriteLine();
@@ -604,14 +609,11 @@ namespace FinalProject
         {
             //remove forward stack history if different page
             if (HistoryForwards.Count() > 0)
-                if (HistoryForwards.Peek() != "StudentRequestsPage")
-                    HistoryForwards.Clear();
-                else
-                    HistoryForwards.Pop();
+                HistoryForwards.Clear();
+
 
             Console.Clear();
             ShowURL();
-            Console.WriteLine();
 
             CustomList<Request> temp = new CustomList<Request>();
             string choice = "";
@@ -630,6 +632,10 @@ namespace FinalProject
                 if (choice == "0")
                 {
                     NavigateBackwards();
+                }
+                else
+                {
+                    StudentRequestsPage();
                 }
 
             }
@@ -651,7 +657,6 @@ namespace FinalProject
 
             Console.Clear();
             ShowURL();
-            Console.WriteLine();
 
             CustomList<Request> temp = new CustomList<Request>();
             string choice = "";
@@ -703,11 +708,6 @@ namespace FinalProject
                             StudentRequests.Dequeue();
                             AdminRequestsPage();
                         }
-                        else
-                        {
-                            StudentRequests.Dequeue();
-                            AdminRequestsPage();
-                        }
                     }
                 }
                 else if (choice == "=")
@@ -737,7 +737,7 @@ namespace FinalProject
             string Choice = "", Time = "";
             ShowURL();
             CustomList<string> AvailableSections = new CustomList<string>();
-            Console.WriteLine("\nCourse: " + Database[IndexOfCourseBeingEdited].Course);
+            Console.WriteLine("Course: " + Database[IndexOfCourseBeingEdited].Course);
             Console.WriteLine("Description: " + Database[IndexOfCourseBeingEdited].Description);
             Console.WriteLine("Course Units: " + Database[IndexOfCourseBeingEdited].CourseUnits.ToString());
             Console.WriteLine("Number of Students Enrolled: " + Database[IndexOfCourseBeingEdited].studentsEnrolled.Count().ToString() + "/" + Database[IndexOfCourseBeingEdited].MaxCourseStudents.ToString() + "\n-----------------------------------------------------------------\n");
@@ -897,7 +897,7 @@ namespace FinalProject
             string Choice = "";
             ShowURL();
             CustomList<Section> AvailableSections = new CustomList<Section>();
-            Console.WriteLine("\nCourse: " + Database[IndexOfCourseBeingEdited].Course);
+            Console.WriteLine("Course: " + Database[IndexOfCourseBeingEdited].Course);
             Console.WriteLine("Description: " + Database[IndexOfCourseBeingEdited].Description);
             Console.WriteLine("Course Units: " + Database[IndexOfCourseBeingEdited].CourseUnits.ToString());
             Console.WriteLine("Number of Students Enrolled: " + Database[IndexOfCourseBeingEdited].studentsEnrolled.Count().ToString() + "/" + Database[IndexOfCourseBeingEdited].MaxCourseStudents.ToString() + "\n-----------------------------------------------------------------\n");
@@ -989,7 +989,6 @@ namespace FinalProject
             {
                 Console.Clear();
                 ShowURL();
-                Console.WriteLine();
                 Console.WriteLine("[1] Course Name: " + Database[IndexOfCourseBeingEdited].Course);
                 Console.WriteLine("[2] Course Description: " + Database[IndexOfCourseBeingEdited].Description);
                 Console.WriteLine("[3] Course Units: " + Database[IndexOfCourseBeingEdited].CourseUnits.ToString());
