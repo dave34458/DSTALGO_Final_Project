@@ -1052,7 +1052,7 @@ namespace FinalProject
                             for (int i = 0; i < Database[IndexOfCourseBeingEdited].Sections.Count(); i++)
                                 CurrentSectionsMaxStudentsSummed += Database[IndexOfCourseBeingEdited].Sections[i].MaxStudentsInSection;
                             if (temp > -1 && temp >= CurrentSectionsMaxStudentsSummed)
-                                Database[IndexOfCourseBeingEdited].CourseUnits = temp;
+                                Database[IndexOfCourseBeingEdited].MaxCourseStudents = temp;
                             else
                             {
                                 Console.WriteLine("\nThe sum of maximum students per section is greater than the course's new maximum student amount\nPress any key to go back...");
@@ -1066,6 +1066,10 @@ namespace FinalProject
                             Console.ReadKey();
                             EditCoursePage(IndexOfCourseBeingEdited);
                         }
+                        EditCoursePage(IndexOfCourseBeingEdited);
+                    }
+                    else
+                    {
                         EditCoursePage(IndexOfCourseBeingEdited);
                     }
                 }
