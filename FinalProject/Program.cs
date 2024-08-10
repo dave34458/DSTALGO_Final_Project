@@ -304,11 +304,6 @@ namespace FinalProject
                 HistoryBackwards.Push("StudentRequestsPage");
                 StudentRequestsPage();
             }
-            if (Choice == "3")
-            {
-                HistoryBackwards.Push("StudentAccountsPage");
-                NavigateForwards();
-            }
             if (Choice == "4")
             {
                 ChangePasswordPage();
