@@ -901,7 +901,6 @@ namespace FinalProject
             else
             {
 
-                Console.WriteLine("Day\tTime Slot\tSection Code\tRoom\tProfessor\tStudent Count");
                 for (int i = 0; i < Database[IndexOfCourseBeingEdited].Sections.Count(); i++)
                 {
                     string TimeSlot = "";
