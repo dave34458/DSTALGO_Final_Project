@@ -19,3 +19,5 @@ D:\Benilde\DSTALGO\FinalProject\obj\Debug\FinalProject.csproj.AssemblyReference.
 D:\Benilde\DSTALGO\FinalProject\obj\Debug\FinalProject.csproj.CoreCompileInputs.cache
 D:\Benilde\DSTALGO\FinalProject\obj\Debug\FinalProject.exe
 D:\Benilde\DSTALGO\FinalProject\obj\Debug\FinalProject.pdb
+D:\Benilde\DSTALGO\FinalProject\obj\Debug\FinalProject.csproj.CopyComplete
+D:\Benilde\DSTALGO\FinalProject\bin\Debug\FinalProjectClassLibrary.dll
