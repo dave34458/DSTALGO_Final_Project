@@ -1,0 +1,6 @@
+Notes: section - (time) -  room - professor - maxstudents
+
+To Finish:
+-View Student Requests
+-View Student Accounts
+-Change Password Admin and Student
